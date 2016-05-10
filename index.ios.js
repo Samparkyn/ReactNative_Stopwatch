@@ -11,25 +11,27 @@ var {
 var StopWatch = React.createClass({
   getInitialState: function(){
     return {
-      timeElapsed: null
+      timeElapsed: null,
+      running: false,
+      startTime: null
     }
   },
   render: function(){ //
     return <View style={styles.container}>
 
-    <View style={[styles.header, this.border('yellow')]}>{/* Yellow */}
-      <View style={[styles.timerWrapper, this.border('red')]}>{/* Red */}
-          <Text>
+    <View style={[styles.header]}>{/* Yellow */}
+      <View style={[styles.timerWrapper]}>{/* Red */}
+          <Text style={styles.timer}>
           {formatTime(this.state.timeElapsed)}
           </Text>
         </View>
-        <View style={[styles.buttonWrapper, this.border('green')]}>{/* Green */}
+        <View style={[styles.buttonWrapper]}>{/* Green */}
          {this.startStopButton()}
          {this.lapButton()}
       </View>
     </View>
 
-    <View style={[styles.footer, this.border('blue')]}>{/* Blue */}
+    <View style={[styles.footer]}>{/* Blue */}
       <Text>
         I am a list of laps...
       </Text>
@@ -37,32 +39,48 @@ var StopWatch = React.createClass({
 
   </View>
   },
+
     startStopButton:function(){
-      return <TouchableHighlight
+      var style = this.state.running ? styles.stopButton : styles.startButton;
+      return <TouchableHighlight style={[styles.button, style]}
        underlayColor="lightgreen"
        onPress={this.handleStartPress}>
-        <Text>Start</Text>
+        <Text>{this.state.running ? 'Stop' : 'Start'}</Text>
       </TouchableHighlight>
     },
+
     lapButton: function(){
-      return <TouchableHighlight
+      return <TouchableHighlight style={[styles.button, styles.lapButton]}
       underlayColor="blue"
       onPress={this.handleLapPress}>
         <Text>Lap</Text>
       </TouchableHighlight>
     },
-    handleStartPress: function(){
-      var startTime = new Date();
 
-      setInterval(() => {
+    handleStartPress: function(){
+      if(this.state.running){
+        clearInterval(this.interval);
+        this.setState({running:false});
+        return
+    }
+
+      this.setState({startTime: new Date()});
+
+      this.interval = setInterval(() => {
         this.setState({
-          timeElapsed: new Date() - startTime
+          timeElapsed: new Date() - this.state.startTime,
+          running: true
         });
       }, 30);
     },
 
     handleLapPress: function(){
-      console.log("Lap was pressed");
+      var lap = this.state.timeElapsed;
+
+      this.setState({
+        startTime: new Date()
+      });
+
     },
 
     border: function(color){
@@ -94,6 +112,26 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center'
+  },
+  timer: {
+    fontSize: 60
+  },
+  button: {
+    borderWidth: 2,
+    height: 80,
+    width: 80,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  startButton: {
+    borderColor: 'lightgreen'
+  },
+  lapButton: {
+    borderColor: 'blue'
+  },
+  stopButton: {
+    borderColor: 'red'
   }
 });
 
